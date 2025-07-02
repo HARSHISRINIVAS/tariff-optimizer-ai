@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>India-USA Trade Insights</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        .top-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #f8f9fa;
+            padding: 10px 30px;
+        }
+        .top-banner img {
+            height: 100px;
+            width: auto;
+        }
+        .top-banner h2 {
+            flex-grow: 1;
+            text-align: center;
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-banner">
+        <img src="{{ url_for('static', filename='Modi_pic.png') }}" alt="Modi">
+        <h2>Smart Trade Advisor: ML-Based Tariff Impact and Optimization System</h2>
+        <img src="{{ url_for('static', filename='Trump_pic.png') }}" alt="Trump">
+    </div>
+
+    <div class="container mt-4">
+        <div class="mb-5">
+            {{ graph_html|safe }}
+        </div>
+        <div class="card p-3 shadow-sm w-75 mb-5">
+            <h4 class="mb-3 text-center">Tariff Effectiveness Calculator</h4>
+
+            <div class="row mb-2">
+                <div class="col-md-6">
+                    <label for="yearSelect" class="form-label">Year:</label>
+                    <select id="yearSelect" class="form-select form-select-sm">
+                        {% for yr in range(2010, 2026) %}
+                            <option value="{{ yr }}">{{ yr }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="tariffSlider" class="form-label">
+                        Tariff: <strong><span id="tariffValue">0</span>%</strong>
+                    </label>
+                    <input type="range" id="tariffSlider" class="form-range" min="0" max="100" value="0">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 text-center">
+                    <div id="gaugeChart" style="height:250px;"></div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-2 bg-light rounded small">
+                        <p class="mb-1">Original Value: <strong><span id="originalValue">$1000</span></strong></p>
+                        <p class="mb-1">New Value: <strong><span id="newValue">$1000</span></strong></p>
+                        <p class="mb-1">Effectiveness: <strong><span id="effectiveness">0%</span></strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        const slider = document.getElementById('tariffSlider');
+        const tariffValue = document.getElementById('tariffValue');
+        const newValueEl = document.getElementById('newValue');
+        const originalValueEl = document.getElementById('originalValue');
+        const effectivenessEl = document.getElementById('effectiveness');
+        const yearSelect = document.getElementById('yearSelect');
+
+        let originalTradeValue = 1000;
+
+        function updateGauge(tariff) {
+            const reduced = originalTradeValue * (1 - tariff / 100);
+            const effective = ((originalTradeValue - reduced) / originalTradeValue) * 100;
+
+            newValueEl.innerText = `$${reduced.toFixed(2)}`;
+            effectivenessEl.innerText = `${effective.toFixed(2)}%`;
+            tariffValue.innerText = tariff;
+
+            const data = [{
+                type: "pie",
+                values: [effective, 100 - effective, 100],
+                labels: ["Effectiveness", "Remaining", ""],
+                textinfo: "label+percent",
+                hole: 0.7,
+                rotation: 180,
+                direction: "clockwise",
+                showlegend: false,
+                marker: { colors: ["#ff4d4d", "#d9d9d9", "white"] }
+            }];
+
+            const layout = {
+                title: `Trade Impact Gauge (${yearSelect.value})`,
+                margin: { t: 50, b: 0, l: 0, r: 0 },
+                height: 250
+            };
+
+            Plotly.newPlot("gaugeChart", data, layout);
+        }
+        updateGauge(0);
+        slider.oninput = () => updateGauge(parseInt(slider.value));
+        yearSelect.onchange = () => updateGauge(parseInt(slider.value));
+    </script>
+    <script>
+        window.chtlConfig = { chatbotId: "3947711235" };
+    </script>
+    <script async data-id="3947711235" id="chtl-script" type="text/javascript" src="https://chatling.ai/js/embed.js"></script>
+
+</body>
+</html>
